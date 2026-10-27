@@ -2,7 +2,7 @@
 
 ## Goal
 
-A Windows bot that plays through the screen only: capture the game, detect UI/enemies with OpenCV, and send mouse/keyboard input. First target is **Helltide farming** in the open world, because it tolerates messy movement better than a dungeon.
+A Windows bot for Diablo IV. The v1 default is screen-vision (capture the game, detect UI/enemies with OpenCV, send mouse/keyboard input), with memory reading, packet inspection, and injection layered on behind `memory.enabled`. First target is **Helltide farming** in the open world, because it tolerates messy movement better than a dungeon.
 
 Everything is on the table; the layers below are sequenced, not excluded:
 

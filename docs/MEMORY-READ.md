@@ -49,9 +49,10 @@ FINDING  (dev, once per patch)          RUNNING  (shipped, daily)
 | 3 | Self-signed kernel driver + test-signing | yes | 2–3 days build |
 | 4 | BYOVD (reuse a signed vulnerable driver) | someone else's | 1–3 days |
 
-**Stop at rung 1 or 2.** The driver rungs are a last resort and only justified
-if the loot item-list gain outweighs the footprint. Current recommendation:
-do not build a driver; keep vision as fallback.
+**Prefer rung 1 or 2.** The driver rungs stay on the table as a fallback if
+the userspace handle is denied — they cost 2–3 days and carry a bigger
+footprint, so reach for them only if the item-list gain justifies it. Vision
+remains the fallback whenever reads are unavailable.
 
 ## The decision gate (30 seconds, done first)
 
@@ -62,8 +63,9 @@ do not build a driver; keep vision as fallback.
    - **Reads return data** → build `memory.py` + `tools/scan.py`, hunt
      position first, then cinder counter, then the item list.
    - **`GetLastError() == 5` (ACCESS_DENIED)** → retry elevated. If still
-     denied → the target strips handle rights; the memory track is dead and we
-     fix loot with vision instead.
+     denied → the target strips handle rights; the userspace path is closed,
+     and the next options are the driver rungs (rung 3/4, on the table) or
+     vision-only.
 
 ## Hunt order (once the gate passes)
 

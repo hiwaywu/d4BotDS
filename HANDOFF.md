@@ -44,7 +44,8 @@ tuning, the 30-second gate decides the whole track:
    module base (plus region enumeration) from the harness.
 4. Report the result: **reads returned data** → build `memory.py` +
    `tools/scan.py` and hunt offsets; **ACCESS_DENIED** → retry elevated; still
-   denied → memory track dead, fall back to the vision fixes.
+   denied → the driver rungs (rung 3/4) are on the table, else vision-only.
+   Full detail in `docs/MEMORY-READ.md`.
 
 ### Step 1 - Get the new code (2 min)
 **DONE 2026-10-24 on this PC:** fresh clone at `C:\AI\Claude\D4BotClau` (not `C:\AI STUFF\...`; use this folder in all commands below), already at latest `main`. `.\setup.cmd` -> "Setup complete." on Python 3.14.7 (numpy 2.5.4, opencv 4.14.0.94, mss 10.2.0). `pytest`: all pass, 15 skipped (no `data/` screenshots on this PC).
