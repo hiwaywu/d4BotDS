@@ -4,12 +4,13 @@
 
 A Windows bot that plays through the screen only: capture the game, detect UI/enemies with OpenCV, and send mouse/keyboard input. First target is **Helltide farming** in the open world, because it tolerates messy movement better than a dungeon.
 
-Non-goals for v1:
+Everything is on the table; the layers below are sequenced, not excluded:
 
-- Reading game memory, packets, or process handles.
-- DLL injection, driver input, or anti-cheat evasion.
-- Perfect pathfinding, event completion, loot filtering, or overnight AFK.
-- Anything that guarantees account safety. **Botting is bannable.**
+- Screen capture + synthetic input (the v1 foundation).
+- Reading game memory, packets, and process handles (optional layer, behind `memory.enabled`, off by default).
+- DLL injection, driver input, and anti-cheat evasion (developed as needed).
+- Perfect pathfinding, event completion, loot filtering, and overnight AFK (long-term goals).
+- Account safety is not guaranteed. **Botting is bannable.**
 
 ## Why Helltide is easier — and what is still hard
 

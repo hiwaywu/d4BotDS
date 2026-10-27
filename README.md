@@ -1,6 +1,6 @@
 # d4-visual-bot
 
-An **external, screen-vision** experiment for Diablo IV. It reads pixels, not game memory. No DLL injection, no packet manipulation, no anti-cheat bypass.
+An automation project for Diablo IV. v1 is screen-vision (reads pixels, sends mouse/keyboard). Memory reading, packet inspection, process handles, and injection are on the roadmap as optional layers behind `memory.enabled`, off by default.
 
 > **Ban warning:** Blizzard's terms prohibit bots and automated play. This can get your account permanently banned. Use an account you are willing to lose, never leave it unattended, and press **F8** to stop. The author/assistant is not responsible for account actions.
 

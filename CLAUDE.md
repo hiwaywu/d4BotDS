@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Diablo IV screen-vision bot (Python, Windows). It reads only the screen and sends mouse/keyboard input; no memory reading or injection - keep it that way.
+Diablo IV bot (Python, Windows). The v1 default is screen-vision (capture the game, send mouse/keyboard input). Memory reading, packet inspection, process handles, DLL injection, and driver input are all on the table and are developed as optional layers behind a config flag (`memory.enabled`), off by default.
 
 **At the start of every session, read `HANDOFF.md` first.** Section 0 ("NEXT SESSION AT THE HOME PC - START HERE") is a step-by-step checklist the user asked to be guided through: the user does not know what to do next, so take them through it one step at a time (exact command, what they should see, wait for their result), skipping steps already marked done.
 

@@ -1,11 +1,13 @@
 # HANDOFF — d4-visual-bot
 
+**MEMORY-READ TRACK (2026-10-27):** the next project step is the memory-read decision gate, not more vision tuning. Full plan + status in [`docs/MEMORY-READ.md`](docs/MEMORY-READ.md). One action unblocks it: launch D4, get in-game (town is fine), and say "go" — the harness runs a 30-second read-only `OpenProcess`+`ReadProcessMemory` test. See section 0 below. Two known vision bugs were also diagnosed this session (loot clicked via the label box centre at 650px radius then blacklisted on timeout; `_run_town` failure falls through to roam) — see `docs/MEMORY-READ.md` "Vision-only fallbacks".
+
 **Status:** full Helltide cycle works live up to the route: town + stash -> Warplan teleport -> route located (kyovashad 0.65) -> farming. 2026-10-25 session (new PC) fixed: false route matches, zone banner + NPC plates clicked as loot, covered window read as death, red item labels, "Helltide ended" firing in a town outside the Helltide. Plain farm test (Step 3) passed: stuck 0 in 3 min. Not safe to leave unattended.
 **RESUME HERE (any PC):** user decision - keep it simple: **record one long route per Helltide town** (5-6 towns): waypoint -> out into the Helltide -> a circuit that ends where the circuit began (the bot repeats the circuit, see 3s). The bot follows it, fights packs on the way, roams freely after a one-way route, and the cycle does town + stash + Warplan when the Helltide ends or every 30 min. Next action: Step 4b with the town the Warplan sends you to (re-record kyovashad as a long route), then show the user the recorded line on the mosaic (green line drawing) before running `-Cycle`. On a new PC: clone, `.\setup.cmd`, then use that clone's folder in every command (this PC: `C:\AI\Claude\D4BotClau`; Windows scaling 200% here - window-size checks must be DPI-aware).
 **RESUME 2026-10-26 (PC with `C:\AI STUFF\Claude\D4BotClau-main`, user only plays D4, Claude runs every command):** routes now: wejinhani, kyovashad, marowen, kurastdocks, jirandai, tyraelsencampment, menestad (all looped), foolsquarry (short one-way). Missing: **samuk** (+ any new town). Next: a **watched** `.\run.cmd -Cycle -EnableInput -IAcceptBanRisk -MaxHours 1 -Snapshots data\cycleN`, then look at the snapshots/log for the 3-min stuck spell seen 21:22 (Kyovashad). Record a town (`-Record <town>`) whenever the Warplan lands somewhere without a route; read the zone name off the screen first (Claude can grab a frame via `ScreenCapture`).
 **Next session: start at section 0 below** (steps 1-3 done on the 2026-10-25 PC; long soak test moved to the very end by user decision).
 **Last updated:** 2026-10-25
-**Repo:** https://github.com/hiwaywu/D4BotClau (private). Push after every change; update this file in the same commit.
+**Repo:** https://github.com/hiwaywu/d4BotDS (private, fresh repo — the old `D4BotClau` remote is retired). Push after every change; update this file in the same commit.
 **Project folder:** `C:\AI STUFF\Claude\Diablo4\d4-visual-bot` (the old copy in `OneDrive\Documents\deepseek-harness\default-workspace\d4-visual-bot` is stale)
 
 ## Quick start (current)
@@ -20,7 +22,7 @@ cd "C:\AI STUFF\Claude\Diablo4\d4-visual-bot"
 ```
 Needs: Warplan next activity = Helltide, Subo in the party, 2560x1440 windowed, game window on top. F8 stops everything. `data/` (screenshots) and `logs/` are not in git; tests that need captures skip without them.
 
-> **Ban warning:** Blizzard prohibits botting. This project uses screen capture + synthetic input only (no memory reading, no injection, no anti-cheat bypass). It can still get the account banned. Watch it and keep F8 reachable.
+> **Ban warning:** Blizzard prohibits botting and this can get the account banned. Watch it and keep F8 reachable. Screen capture + synthetic input is the current default; memory reading, packet inspection, and injection are developed as optional layers behind `memory.enabled`.
 
 ---
 
@@ -31,6 +33,18 @@ Needs: Warplan next activity = Helltide, Subo in the party, 2560x1440 windowed, 
 All new work is merged into **`main`** (2026-10-24). The user now works locally on the home PC: commit and push to `main` there.
 
 **User decision (2026-10-24): priority is getting it running and adding features, not long soak tests.** Do NOT require a 30+ minute test before moving on. Short runs to check each change are enough; the one long test (1h+ cycle) happens at the very end, after everything below is built (see "Roadmap" after Step 7).
+
+### Step 0 - Memory-read decision gate (30 sec, do this first)
+The memory-read layer is now in scope (`docs/MEMORY-READ.md`). Before any vision
+tuning, the 30-second gate decides the whole track:
+
+1. Launch Diablo IV, get in-game (town is fine), game window on top.
+2. Tell Claude "game is up".
+3. Claude runs a read-only `OpenProcess(PROCESS_VM_READ)` + 4-byte read at the
+   module base (plus region enumeration) from the harness.
+4. Report the result: **reads returned data** → build `memory.py` +
+   `tools/scan.py` and hunt offsets; **ACCESS_DENIED** → retry elevated; still
+   denied → memory track dead, fall back to the vision fixes.
 
 ### Step 1 - Get the new code (2 min)
 **DONE 2026-10-24 on this PC:** fresh clone at `C:\AI\Claude\D4BotClau` (not `C:\AI STUFF\...`; use this folder in all commands below), already at latest `main`. `.\setup.cmd` -> "Setup complete." on Python 3.14.7 (numpy 2.5.4, opencv 4.14.0.94, mss 10.2.0). `pytest`: all pass, 15 skipped (no `data/` screenshots on this PC).
@@ -303,10 +317,10 @@ Commands: `.\run.cmd -Helltide -EnableInput -IAcceptBanRisk` (teleport only), ad
 
 ## 3n. Ideas taken from qqt_diablo (2026-10-24, built offline, not yet run live)
 
-User asked what helps from https://github.com/qqtnn/qqt_diablo. It is a Lua plugin set for an **injected** loader (reads game memory, engine pathfinder, packets) - the opposite of this project's screen-only design and a far bigger ban risk, so no code was used, only ideas:
+User asked what helps from https://github.com/qqtnn/qqt_diablo. It is a Lua plugin set for an **injected** loader (reads game memory, engine pathfinder, packets). Only ideas were taken (memory/injection is now in scope for this project too, see `docs/MEMORY-READ.md`):
 - **Path planning** (from its `piteer` explorer, which runs A* on the game's walkable grid). `minimap.PathField`: BFS over the minimap walkable mask on a 4px grid (`nav.path_planning`, `nav.path_cell_px`). Runs only when a pack or loot star is behind blocked ground; each gets `Pack.via` (furthest route point reachable in a straight line) and `Pack.path_px` (route length). Goal choice now costs the route length instead of "3x if blocked"; steering, approach clicks and loot walking head for the waypoint; stuck-at-pack check uses that direction. Overlay draws the route in green. Cost: ~0.2ms typical, ~6ms on a serpentine worst case. Sim (`test_hunt_walks_around_a_wall_to_reach_a_pack`): pack behind a wall with a gap to the side reached in 5.3s, stuck 0 (planning off: 18.1s, stuck 1). Packs only reachable via ground off the visible minimap still count as blocked.
 - **Idle watchdog** (its Helltide script resets after a long time without casting). In `-Cycle`, no FIGHT/APPROACH/LOOT for `--idle-reset-min` (default 4, `-IdleResetMin` in run.ps1, 0 = off) ends the round like a stash trip: town -> teleport -> route.
-- Not taken: its task-manager structure (one task per tick, `shouldExecute/Execute`) - worth doing before adding spawners / revive / potions, but a refactor of `CombatBrain.decide` needs live runs to trust. Melee "move slightly past the target" - not needed while approach works. Evade, health-based targeting, auto-repair API - need game memory.
+- Not taken: its task-manager structure (one task per tick, `shouldExecute/Execute`) - worth doing before adding spawners / revive / potions, but a refactor of `CombatBrain.decide` needs live runs to trust. Melee "move slightly past the target" - not needed while approach works. Evade, health-based targeting, auto-repair API - now reachable via the memory layer (in scope).
 
 ## 3o. YOLO pipeline (2026-10-24, built offline, no real model yet)
 
